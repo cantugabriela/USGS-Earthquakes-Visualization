@@ -1,7 +1,25 @@
 // Store API link
 var link = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson"
 
+function markerSize(mag) {
+  return mag * 15000;
+}
 
+function markerColor(mag) {
+  if (mag <= 1) {
+      return "#ADFF2F";
+  } else if (mag <= 2) {
+      return "#9ACD32";
+  } else if (mag <= 3) {
+      return "#FFFF00";
+  } else if (mag <= 4) {
+      return "#ffd700";
+  } else if (mag <= 5) {
+      return "#FFA500";
+  } else {
+      return "#FF0000";
+  };
+}
 
 // Perform a GET request to the query URL
 d3.json(link, function(data) {
@@ -11,19 +29,24 @@ d3.json(link, function(data) {
 
 function createFeatures(earthquakeData) {
 
+  var earthquakes = L.geoJSON(earthquakeData, {
   // Define a function we want to run once for each feature in the features array
   // Give each feature a popup describing the place and time of the earthquake
-  function onEachFeature(feature, layer) {
+ onEachFeature : function (feature, layer) {
 
     layer.bindPopup("<h3>" + feature.properties.place +
-      "</h3><hr><p>" + new Date(feature.properties.time) + "</p>" + "<p> Magnitude: " +  feature.properties.mag + "</p>");
+      "</h3><hr><p>" + new Date(feature.properties.time) + "</p>" + "<p> Magnitude: " +  feature.properties.mag + "</p>")
+    },     pointToLayer: function (feature, latlng) {
+      return new L.circle(latlng,
+        {radius: markerSize(feature.properties.mag),
+        fillColor: markerColor(feature.properties.mag),
+        fillOpacity: 1,
+        stroke: false,
+    })
   }
-
-  // Create a GeoJSON layer containing the features array on the earthquakeData object
-  // Run the onEachFeature function once for each piece of data in the array
-  var earthquakes = L.geoJSON(earthquakeData, {
-    onEachFeature: onEachFeature
   });
+    
+
 
   // Sending our earthquakes layer to the createMap function
   createMap(earthquakes);
@@ -60,7 +83,7 @@ function createMap(earthquakes) {
   // Create our map, giving it the satelitemap and earthquakes layers to display on load
   var myMap = L.map("map", {
     center: [31.57853542647338,-99.580078125],
-    zoom: 4,
+    zoom: 3,
     layers: [satelitemap, earthquakes]
   });
 
@@ -71,3 +94,6 @@ function createMap(earthquakes) {
     collapsed: false
   }).addTo(myMap);
 }
+
+
+
