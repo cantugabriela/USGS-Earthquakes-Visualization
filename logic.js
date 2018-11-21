@@ -2,7 +2,7 @@
 var link = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson"
 
 function markerSize(mag) {
-  return mag * 15000;
+  return mag * 30000;
 }
 
 function markerColor(mag) {
@@ -93,7 +93,27 @@ function createMap(earthquakes) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+  var legend = L.control({position: 'bottomright'});
+
+  legend.onAdd = function () {
+  
+      var div = L.DomUtil.create('div', 'info legend'),
+          magnitudes = [0, 1, 2, 3, 4, 5];
+  
+      for (var i = 0; i < magnitudes.length; i++) {
+          div.innerHTML +=
+              '<i style="background:' + markerColor(magnitudes[i] + 1) + '"></i> ' + 
+      + magnitudes[i] + (magnitudes[i + 1] ? ' - ' + magnitudes[i + 1] + '<br>' : ' + ');
+      }
+  
+      return div;
+  };
+  
+  legend.addTo(myMap);
+
 }
 
 
 
+  
